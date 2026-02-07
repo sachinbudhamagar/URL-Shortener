@@ -9,6 +9,7 @@ URL shortener web application that allows users
 # Create/Setup 
 
 Virtual Environment
+
       python -m venv venv
       venv\Scripts\activate.ps1
 
