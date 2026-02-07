@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Apps
     "accounts",
     "shortener",
     "analystics",
@@ -117,4 +118,20 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
+
+# Custom User Model
+AUTH_USER_MODEL = "accounts.User"
+
+# Authentication URLs
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "shortener:dashboard"
+LOGOUT_REDIRECT_URL = "accounts:login"
+
+# Static files
+STATIC_URL = "/static/"
+# STATICFILES_DIRS = [BASE_DIR / "static"]
+# STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Media files
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
