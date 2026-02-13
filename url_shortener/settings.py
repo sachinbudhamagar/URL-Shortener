@@ -123,8 +123,8 @@ USE_TZ = True
 AUTH_USER_MODEL = "accounts.User"
 
 # Authentication URLs
-LOGIN_URL = "accounts:login"
-LOGIN_REDIRECT_URL = "shortener:dashboard"
+LOGIN_URL = "login"  # Where to redirect if @login_required fails login
+LOGIN_REDIRECT_URL = "dashboard"  # Where to go after successful login
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 # Static files

@@ -1,0 +1,20 @@
+{% extends "shortener/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Login</h2>
+    <form method="POST">
+        {% csrf_token %}  <!-- CSRF protection -->
+        {{ form.as_p }}   <!-- Render form fields -->
+        <button type="submit">
+            Log In
+        </button>
+    </form>
+    <p>
+        Don't have an account? 
+        <a href="{% url 'register' %}">
+            Register
+        </a>
+    </p>
+</div>
+{% endblock %}
