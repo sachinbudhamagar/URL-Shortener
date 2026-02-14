@@ -11,4 +11,5 @@ urlpatterns = [
         name="login",
     ),
     path("logout/", views.logout_view, name="logout"),
+    path("<str:short_code>/", views.redirect_url, name="redirect"),
 ]

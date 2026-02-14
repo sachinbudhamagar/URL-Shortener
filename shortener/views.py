@@ -3,11 +3,12 @@ from django.contrib import messages
 from .forms import UserRegisterForm
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponseForbidden
-from .models import URL
+from .models import URL, Click
 from .forms import URLForm
 from .utils import generate_short_code, generate_random_code
+from django.db.models import F
 
 
 # Create your views here.
@@ -90,3 +91,39 @@ def create_url(request):
             form = URLForm()
 
         return render(request, "shortener/create_url.html", {"form": form})
+
+
+# Redirection Logic
+def redirect_url(request, short_code):
+    """Redirect short code to original URL"""
+    # Get URL object or show 404
+    url_obj = get_object_or_404(URL, short_code=short_code)
+
+    # Check if expired
+    if url_obj.is_expired():
+        return render(request, "shortener/expired.html", {"url": url_obj})
+
+    # Increment click count (F() prevents race conditions)
+    url_obj.click_count = F("click_count") + 1
+    url_obj.save()
+    url_obj.refresh_from_db()  # Get updated count
+
+    # Optional: Log detailed click data
+    Click.objects.create(
+        url=url_obj,
+        ip_address=request.META.get("HTTP_USER_AGENT", "")[:300],
+        referrer=request.META.get("HTTP_REFERER", ""),
+    )
+
+    # Redirect to original URL (302 = temporary redirect)
+    return redirect(url_obj.original_url)
+
+
+def get_client_ip(request):
+    """Extract client IP address from request"""
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR")
+    return ip
