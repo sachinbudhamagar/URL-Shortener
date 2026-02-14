@@ -57,9 +57,22 @@ def edit_url(request, short_code):
     # Get URL object or 404 if not found
     url_obj = get_object_or_404(URL, short_code=short_code)
 
-    # Check ownership
+    # Check/Verify ownership
     if url_obj.user != request.user:
-        return HttpResponseForbidden("You don't have permission to edit this URL.")
+        return HttpResponseForbidden("You don't own this URL.")
+
+    if request.method == "POST":
+        if request.method == "POST":
+            form = URLForm(request.POST, instance=url_obj)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "URL updated successfully!")
+                return redirect("dashboard")
+    else:
+        # Pre-fil form with existing data
+        form = URLForm(instance=url_obj)
+
+    return render(request, "shortener/edit_url.html", {"form": form, "url": url_obj})
 
 
 @login_required
