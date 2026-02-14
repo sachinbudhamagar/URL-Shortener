@@ -9,6 +9,7 @@ from .models import URL, Click
 from .forms import URLForm
 from .utils import generate_short_code, generate_random_code
 from django.db.models import F
+from django.core.paginator import Paginator
 
 
 # Create your views here.
@@ -31,9 +32,24 @@ def register(request):
 
 @login_required  # Requires user to be logged in
 def dashboard(request):
-    # Get only URLs belonging to current user
-    user_urls = request.user.urls.all()  # Uses related_name from model
-    return render(request, "shortener/dashboard.html", {"urls": user_urls})
+    # Get only URLs belonging to current user, ordered by newest first
+    url_list = request.user.urls.all()  # Uses related_name from model
+
+    # Pagination (10 URLs per page)
+    pagination = Paginator(url_list, 10)
+    page_number = request.GET.get("page")
+    urls = pagination.get_page(page_number)
+
+    # Calculate total stats
+    total_clicks = sum(url.click_count for url in url_list)
+    total_urls = url_list.count()
+
+    context = {
+        "urls": urls,
+        "total_clicks": total_clicks,
+        "total_urls": total_urls,
+    }
+    return render(request, "shortener/dashboard.html", context)
 
 
 @login_required

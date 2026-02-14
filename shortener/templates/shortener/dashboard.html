@@ -1,0 +1,61 @@
+{% extends "shortener/base.html" %}
+
+{% block content %}
+
+<div class="container">
+    <h1>My URLs</h1>
+
+    <div class="stats">
+        <p>Total URLs: {{ total_urls }}</p>
+        <p>Total Clicks: {{ total_clicks }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Short URL</th>
+                <th>Original URL</th>
+                <th>Created</th>
+                <th>Clicks</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for url in urls %}
+            <tr>
+                <td>
+                    <a href="/{{ url.short_code }}" target="_blank">
+                        {{ request.schema }}://{{ request.get_host }}/{{ url.short_code }}
+                    </a>
+                    <button onclick="copyUrl('{{ url.short_code }}')">Copy</button>
+                </td>
+                <td>{{ url.Original_url|truncatechars:50 }}</td>
+                <td>{{ url.created_at|date:"M d, Y"}}</td>
+                <td>{{ url.click_count }}</td>
+                <td>
+                    <a href="{% url 'edit_url' url.short_code %}">Edit</a>
+                    <a href="{% url 'delete_url' url.short_code %}">Edit</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">
+                    No URLs yet. 
+                    <a href="{% url 'created_url' %}"> Create one!</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+     <div class="pagination">
+        {% if urls.has_previous %}
+            <a href="?page= {{ urls.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span> Page {{ urls.number }} of {{ urls.paginator.num_pages }}</span>
+        {% if urls.has_next %}
+            <a href="?page= {{ urls.next_page_number }}">Next</a>
+        {% endif %}
+     </div>
+</div>
+{% endblock %}
