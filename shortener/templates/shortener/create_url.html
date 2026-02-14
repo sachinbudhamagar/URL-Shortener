@@ -1,0 +1,30 @@
+{% extends "shortener/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Shorten Your URL</h1>
+
+    {% if short_url %}
+    <div class="alert alert-success">
+        <p>Your short URL: </p>
+        <input type="text" value="{{ short_url }}" id="shortUrl" readonly>
+        <button onclick="copyToClipboard()">Copy</button>
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Shorten URL</button>
+    </form>
+</div>
+
+<script>
+    function copyToClipboard(){
+        const urlInput = document.getElementById("shortUrl");
+        urlInput.select();
+        document.execCommand("copy");
+        alert("Copied to clipboard");
+    }
+</script>
+{% endblock %}
