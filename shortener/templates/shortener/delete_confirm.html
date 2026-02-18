@@ -1,0 +1,15 @@
+{% extends "shortener/base.html" %}
+{% block cntenet %}
+<div class="container">
+    <h2>Confirm Deletion</h2>
+    <p>Are you sure you want to delete this URL?</p>
+    <p><strong>Short code: </strong> {{ url.short_code }}</p>
+    <p><strong>Original URL:</strong>{{<strong url.original_url }}</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn-danger">Yes, Delete</button>
+        <a herf="{% url 'dashboard' %}">Cancel</a>
+    </form>
+</div>
+{% end block %}
