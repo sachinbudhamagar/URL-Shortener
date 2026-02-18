@@ -1,17 +1,18 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import UserRegisterForm
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponseForbidden
-from .models import URL, Click
-from .forms import URLForm
-from .utils import generate_short_code, generate_random_code
 from django.db.models import F, Sum, Count, Q
 from datetime import timedelta
 from django.utils import timezone
 from django.core.paginator import Paginator
+
+from .forms import UserRegisterForm
+from .models import URL, Click
+from .forms import URLForm
+from .utils import generate_short_code, generate_random_code
 
 
 # Create your views here.
@@ -138,16 +139,13 @@ def redirect_url(request, short_code):
     url_obj.click_count = F("click_count") + 1
     url_obj.save()
     url_obj.refresh_from_db()  # Get updated count
-    #Automic increment - prvents race condition
-    URL.objects.filter(pk=url_obj.pk).update(
-        click_count=F("click_count" + 1)
-    )
 
     # Optional: Log detailed click data
     Click.objects.create(
         url=url_obj,
-        clicked_at=timezone.now()
-        ip_address=request.META.get("HTTP_USER_AGENT", "")[:300],
+        clicked_at=timezone.now(),
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get("HTTP_USER_AGENT", "")[:300],
         referrer=request.META.get("HTTP_REFERER", ""),
     )
 
@@ -178,60 +176,55 @@ def delete_url(request, short_code):
         return redirect("dashboard")
 
     # Show confirmation page
-    return render(request, "shortener/delete_confirm.html"), {"url" : url_obj}
+    return render(request, "shortener/delete_confirm.html", {"url": url_obj})
+
 
 @login_required
-def analystics(request):
+def analytics(request):
     user_urls = request.user.urls.all()
-    
+
     # Overall statistics
     total_urls = user_urls.count()
-    total_clicks = user_urls.aggregte(Sum("click_count")) ["click_count__sum"] or 0
-    
+    total_clicks = user_urls.aggregate(Sum("click_count"))["click_count__sum"] or 0
+
     # Most clicked URL
     most_clicked = user_urls.order_by("click_count").first()
-    
+
     # Most clicked URL (excluding zero clicks)
     least_clicked = user_urls.filter(click_count__gt=0).order_by("click_count").first()
-    
+
     # Recent activity (last 7 days)
-    week_ago =  timezone.now() - timedelta(days=7)
+    week_ago = timezone.now() - timedelta(days=7)
     recent_clicks = Click.objects.filter(
-        url__user=request.user,
-        clicked_at__gte=week_ago
+        url__user=request.user, clicked_at__gte=week_ago
     ).count()
-    
-    #Clicks per day (last 7 days)
+
+    # Clicks per day (last 7 days)
     daily_clicks = []
     for i in range(7):
         day = timezone.now() - timedelta(days=i)
         day_start = day.replace(hour=0, minute=0, second=0)
         day_end = day.replace(hour=23, minute=59, second=59)
-        
+
         count = Click.objects.filter(
-            url__user=request.user,
-            clicked_at__gte=day_start,
-            clicked_at__lte=day_end
+            url__user=request.user, clicked_at__gte=day_start, clicked_at__lte=day_end
         ).count()
-        
-        daily_clicks.append({
-            "date": day.strftime("%b %d"),
-            "count": count
-        })
-        
+
+        daily_clicks.append({"date": day.strftime("%b %d"), "count": count})
+
     daily_clicks.reverse()  # Oldest to newest
-    
+
     # Top 5 URLs by clicks
-    top_urls = user_urls.order_by("-click_count"[:5])
-    
+    top_urls = user_urls.order_by("-click_count")[:5]
+
     context = {
-        "total-urls": total_urls,
+        "total_urls": total_urls,
         "total_clicks": total_clicks,
-        "most_clicks": most_clicked,
+        "most_clicked": most_clicked,
         "least_clicked": least_clicked,
         "recent_clicks": recent_clicks,
         "daily_clicks": daily_clicks,
         "top_urls": top_urls,
     }
-    
-    return render(request, "shortener/analytics.html")
+
+    return render(request, "shortener/analytics.html", context)

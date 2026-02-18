@@ -4,33 +4,28 @@ from django.conf import settings
 from django.utils import timezone
 
 
-# Model 1: URL - Stores shortened URLs
 class URL(models.Model):
-    # Fields
-    orginal_urls = models.URLField(max_length=2000)  # Long URLs
-    short_code = models.CharField(
-        max_length=15, unique=True, db_index=True
-    )  # Unique short code
-    email = models.EmailField(unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # Auto-set on create
-    updated_at = models.DateTimeField(auto_now=True)  # Auto-update on save
-    click_count = models.IntegerField(default=0)  # Track total clicks
+    original_url = models.URLField(max_length=2000)
+    short_code = models.CharField(max_length=15, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    click_count = models.IntegerField(default=0)
 
-    # Relationship: Each URL belongs to one user
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="urls"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="urls",
+        null=True,
+        blank=True,
     )
-    # on_delete = CASCADE means: if user deleted, delete their URLs too
-    # related_name = "urls" means: access user's URLs via user.urls.all()
 
-    # Optional fields for bonus features
-    custom_code = models.BooleanField(default=False)  # Track if custom
-    expiration_date = models.DateTimeField(null=True, blank=True)  # Optional expiry
+    custom_code = models.BooleanField(default=False)
+    expiration_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        ordering = ["-created_at"]  # Newest first
+        ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=["short_code"]),  # Fast lookups
+            models.Index(fields=["short_code"]),
         ]
 
     def __str__(self):
@@ -42,16 +37,12 @@ class URL(models.Model):
         return False
 
 
-# Model 2: Click - Stores detailed click analytics (optional for Phase 5.3)
 class Click(models.Model):
-    # Relationship: Each click belongs to one URL
     url = models.ForeignKey(URL, on_delete=models.CASCADE, related_name="clicks")
-
-    # Analytics fields
     clicked_at = models.DateTimeField(auto_now_add=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
-    user_agent = models.CharField(max_length=300, blank=True)  # Browser info
-    referrer = models.URLField(max_length=2000, blank=True)  # Where click came from
+    user_agent = models.CharField(max_length=300, blank=True)
+    referrer = models.URLField(max_length=2000, blank=True)
 
     class Meta:
         ordering = ["-clicked_at"]
