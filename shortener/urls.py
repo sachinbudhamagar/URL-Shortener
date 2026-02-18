@@ -12,5 +12,6 @@ urlpatterns = [
     ),
     path("logout/", views.logout_view, name="logout"),
     path("<str:short_code>/", views.redirect_url, name="redirect"),
-    path("<str:short_code>/", views.views.edit_url, name="edit_url"),
+    path("edit/<str:short_code>/", views.edit_url, name="edit_url"),
+    path("delete/<str:short_code>/", views.delete_url, name="delete_url"),
 ]

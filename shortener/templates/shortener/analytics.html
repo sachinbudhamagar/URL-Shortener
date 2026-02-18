@@ -1,0 +1,130 @@
+{% extends 'shortener/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Anaytics Dashboard</h1>
+
+    <!-- Summary Cards-->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total URLs</h3>
+            <p class="stat-number">{{ total_urls }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Total Clicks</h3>
+            <p class="stat-number">{{ total_clicks }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Clicks (Last 7 days)</h3>
+            <p class="stat-number">{{ recent_clicks }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Avg Clicks per URL</h3>
+            <p class="stat-number">
+                {% if total_urls > 0 %}
+                    {{ total_clicks|floatformat:1 }}
+                {% else %}
+                    0
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Top Performers -->
+     <div class="top-urls">
+        <h2>Top 5 URLs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rand</th>
+                    <th>Short Code</th>
+                    <th>Original URL</th>
+                    <th>Clicks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for url in top_urls %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <a href="/{{ url.short_code }}" target="_blank">{{ url.short_code }}</a>
+                    </td>
+                    <td>{{ url.original_url|truncatechars:60 }}</td>
+                    <td>{{ url.click_count }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No URLs yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+     </div>
+
+     <!-- Click Trend Chart -->
+    
+    <div class="chart-container">
+        <h2>Click Trend (Last 7 days)</h2>
+        <canvas id="clickChart"></canvas>
+    </div>
+    <!-- Best/Worst -->
+    <div class="comparison">
+        <div class="best">
+            <h2>Click Trend (Last 7 days)</h2>
+            {% if most_clicked %}
+                <p><strong>{{ most_clicked.short_code }}</strong></p>
+                <p>{{ most_clicked.click_count }} clicks</p>
+            {% else %}
+                <p>No data yet</p>
+            {% endif %}
+        </div>
+        <div class="worst">
+            <h3>Least Clicked URL</h3>
+            {% if least_clicked %}
+                <p><strong>{{ least_clicked.short_code }}</strong></p>
+                <p>{{ least_clicked.click_count }}</p>
+            {% else %}
+                <p>No data yet</p>
+            {% endif %}
+        </div>
+    </div> 
+</div>
+
+<!-- Chart.js for visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById("clickChart").getContext("2d");
+    const clickChart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: [
+                {% for day in daily_clicks %}
+                    "{{ day.date }}"{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                label: "Clicks",
+                data: [
+                    {% for day in daily_clicks %}
+                        {{ day.count }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                ],
+                borderColor: "rgb(75, 192, 192)",
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
