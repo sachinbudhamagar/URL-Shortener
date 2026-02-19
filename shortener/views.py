@@ -228,3 +228,54 @@ def analytics(request):
     }
 
     return render(request, "shortener/analytics.html", context)
+
+
+@login_required
+def url_detail_analytics(request, short_code):
+    """Detailed analytics for specific URL"""
+    url_obj = get_object_or_404(URL, short_code=short_code)
+
+    # Verify ownership
+    if url_obj.user != request.user:
+        return HttpResponseForbidden("You don't own this URL.")
+
+    # Get all clicks for this URL
+    all_clicks = url_obj.clicks.all().order_by("-clicked_at")
+
+    # Unique visitors (by IP)
+    unique_ips = url_obj.clicks.values("ip_address").distinct().count()
+
+    # Top referrers
+    top_referrers = (
+        url_obj.clicks.values("referrer")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+        .exclude(referrer="")[:5]
+    )
+
+    # Browser/Device breakdown (simplified)
+    user_agents = (
+        url_obj.clicks.values("user_agent")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:10]
+    )
+
+    # Geographic data (basic - IP-based would need external service)
+    # For now, just show unique IPs
+
+    # Clicks y hour (24-hour breakdown)
+    hourly_clicks = []
+    for hour in range(24):
+        count = url_obj.clicks.filter(clicked_at__hour=hour).count()
+        hourly_clicks.append({"hour": f"{hour:02d}:00", "count": count})
+
+    context = {
+        "url": url_obj,
+        "total_clicks": url_obj.click_count,
+        "unique_visitors": unique_ips,
+        "recent_clicks": all_clicks[:20],  # Last 20 clicks
+        "top_referrers": top_referrers,
+        "hourly_clicks": hourly_clicks,
+    }
+
+    return render(request, "shortener/url_detail.html", context)

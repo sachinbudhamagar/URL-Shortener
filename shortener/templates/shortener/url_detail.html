@@ -1,0 +1,115 @@
+{% extedns "shorterner/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Analytics: {{ url.short_code }}</h1>
+    <p><strong>Original URL:</strong> {{ url.original_url }}</p>
+
+    <!-- Key Metrics -->
+     <div class="metrics">
+        <div class="metric">
+            <h3>Total Clicks</h3>
+            <p>{{ total_clicks }}</p>
+        </div>
+        <div class="metric">
+            <h3>Unique Visitors</h3>
+            <p>{{ unique_visitors }}</p>
+        </div>
+        <div class="metric">
+            <h3>Created</h3>
+            <p>{{ url.created_at|date:"M d, Y" }}</p>
+        </div>
+     </div>
+
+     <!-- Top Referrers -->
+    <div class="referrers">
+        <h2>Top Referrers</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>Clicks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ref in top_referrers %}
+                <tr>
+                    <td>{{ ref.referrer|default:"Direct" }}</td>
+                    <td>{{ ref.count }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2">No referrer data</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Hourly Activity -->
+     <div class="hourly-chart">
+        <h2>Clicks by Hour</h2>
+        <canvas id="hourlyChart"></canvas>
+     </div>
+
+    <!-- Recent Clicks -->
+    <div class="recent-clicks">
+        <h2>Recent Clicks</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>IP Address</th>
+                    <th>Referrer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for click in recent-clicks %}
+                <tr>
+                    <td>{{ click.clicked_at|date:"M d, Y H:i" }}</td>
+                    <td>{% click.ip_address|default:"Unknown" %}</td>
+                    <td>{% click.referrer|default:"Direct"|truncatechars:40 %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const hourlyCtx = document.getElementById("hourlyChart").getContext("2d");
+    new Chart(hourlyCtx, {
+        type: "bar",
+        data: {
+            labels: [
+                {% for hour in hourly_clicks %}
+                    "{{ hour.hour }}"{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                label: "Clicks by Hour",
+                data: [
+                    {% for hour in hourly_clicks %}
+                        {{ hour.count }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
