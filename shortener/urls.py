@@ -14,4 +14,9 @@ urlpatterns = [
     path("<str:short_code>/", views.redirect_url, name="redirect"),
     path("edit/<str:short_code>/", views.edit_url, name="edit_url"),
     path("analytics/", views.analytics, name="analytics"),
+    path(
+        "url/<str:short_code>/analytics/",
+        views.url_detail_analytics,
+        name="url_detail_analytics",
+    ),
 ]
