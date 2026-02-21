@@ -19,4 +19,5 @@ urlpatterns = [
         views.url_detail_analytics,
         name="url_detail_analytics",
     ),
+    path("", views.home, name="home"),
 ]

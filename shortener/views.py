@@ -279,3 +279,37 @@ def url_detail_analytics(request, short_code):
     }
 
     return render(request, "shortener/url_detail.html", context)
+
+
+def home(request):
+    """Landing page with URL shortening form"""
+    if request.method == "POST":
+        # Allow anonymus URL shortening
+        form = URLForm(request.POST)
+        if form.is_valid():
+            url_obj = form.save(commit=False)
+
+            # If loggin in, assign user
+            if request.user.is_authenticated:
+                url_obj_user = request.user
+            # If anonymus, leave user as None (need to modify model)
+
+            # Generate  short code
+            url_obj.short_code = generate_random_code()
+            url_obj.save()
+
+            short_url = request.build_absolute_url("/") + url_obj.short_code
+
+            return render(
+                request,
+                "shortener/home.html",
+                {
+                    "form": URLForm(),
+                    "short_url": short_url,
+                    "show_signup_prompt": not request.user.is_authenticated,
+                },
+            )
+        else:
+            form = URLForm()
+
+        return render(request, "shortener/home.html", {"form": form})

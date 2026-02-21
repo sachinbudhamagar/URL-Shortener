@@ -1,0 +1,129 @@
+{% extends "shortener/base.html" %}
+{% block title %} Shorten Your URLs - Free URL Shortener{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+ <div class="hero text-center py-5">
+    <h1 class="display-4 mb-4">Shorten Your Links in Seconds</h1>
+    <p class="lead mb-5">
+        Create short, memorable links. Track clicks. Share anywhere
+    </p>
+
+    <!-- URL Shortening Form -->
+    <div class="row justify-content-center">
+        {% if short_url %}
+            <!-- Success - Show short URL -->
+            <div class="alert alert-success">
+                <div class="input-group input-group-lg my-3">
+                    <h4> Your short URL is ready</h4>
+                    <input type="text" class="form-control" id="shortUrlInput"
+                        value="{{ short_url }}" readonly>
+                    <button class="btn btn-primary" onclick="copyToClipboard()">
+                        Copy
+                    </button>
+                </div>
+            
+
+                {% if show_signup_prompt %}
+                    <p class="mb-0">
+                        <a href="{% url 'register' %}">Sign up</a> to track clicks and manage your links!
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Shorten another -->
+            <a href="{% url 'home' %}" class="btn btn-outline-primary">
+                    Shorten Another URL
+                </a>
+            {% else %}
+                <!-- Input Form -->
+                <form method="POST" class="mb-4">
+                    {% csrf_token %}
+                    <div class="input-group input-group-lg">
+                        {{ form.original_url }}
+                        <button class="btn btn-primary btn-lg" type="submit">
+                            Shorten URL
+                        </button>
+                    </div>
+                    {% if form.errors %}
+                        <div class="alert alert-danger mt-2">
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+                </form>
+                
+                <p class="text-muted">
+                    <small>
+                        No registration required. 
+                        <a href="{% url 'register' %}">Sign up</a> for analytics and custom URLs.
+                    </small>
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features py-5">
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="feature-icon mb-3">
+                <span style="font-size: 3rem;">⚡</span>
+            </div>
+            <h3>Lightning Fast</h3>
+            <p>Shorten URLs instantly with our optimized platform</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="feature-icon mb-3">
+                <span style="font-size: 3rem;">📊</span>
+            </div>
+            <h3>Detailed Analytics</h3>
+            <p>Track clicks, referrers, and visitor insights</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="feature-icon mb-3">
+                <span style="font-size: 3rem;">🔒</span>
+            </div>
+            <h3>Secure & Reliable</h3>
+            <p>Your links are safe and always available</p>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+{% if not user.is_authenticated %}
+<div class="cta bg-light py-5 text-center">
+    <h2 class="mb-4">Ready to get started?</h2>
+    <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-3">
+        Sign Up Free
+    </a>
+    <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+        Login
+    </a>
+</div>
+{% endif %}
+
+<script>
+function copyToClipboard() {
+    const input = document.getElementById('shortUrlInput');
+    input.select();
+    input.setSelectionRange(0, 99999); // Mobile compatibility
+    
+    navigator.clipboard.writeText(input.value).then(() => {
+        // Change button text temporarily
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✓ Copied!';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-primary');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-primary');
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}
+ 
+
