@@ -21,32 +21,66 @@ class UserRegisterForm(UserCreationForm):
 
 
 class URLForm(forms.ModelForm):
+    custom_short_code = forms.CharField(
+        max_length=15,
+        required=15,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Custom code (optional)",
+                "pattern": "[a-zA-Z0-9-_]+",
+                "title": "Only letters, numbers, hyphens, and underscores",
+            }
+        ),
+    )
+
     class Meta:
         model = URL
         fields = ["original_url"]  # Only field user inputs
-        widgets = {
-            "original_url": forms.URLInput(
-                attrs={
-                    "placeholder": "Enter your long URL here....",
-                    "class": "form-control",
-                }
-            )
-        }
-
-    # Optional: Custom short code field
-    custom_short_code = forms.CharField(
-        max_length=15,
-        required=False,
-        widget=forms.TextInput(attrs={"placeholder": "Custom code (optional)"}),
-    )
 
     def clean_custom_short_code(self):
         code = self.cleaned_data.get("custom_short_code")
-        if code:
-            # Check if already exists
-            if URL.objects.filter(short_code=code).exists():
-                raise forms.ValidationError("This custom code is already taken.")
-            # Only alphanumeric
-            if not code.isalnum():
-                raise forms.ValidationError("OOnly letters and numbers allowed.")
+
+        if not code:
+            return code
+
+        # Reserved words
+        RESERVED_WORDS = [
+            "admin",
+            "api",
+            "login",
+            "logout",
+            "register",
+            "dashboard",
+            "analytics",
+            "settings",
+            "help",
+            "about",
+            "contact",
+            "privacy",
+            "terms",
+        ]
+
+        if code.lower() in RESERVED_WORDS:
+            raise forms.ValidationError(
+                f"'{code}' is a reserved word. Please choose another."
+            )
+
+        # Length check
+        if len(code) < 3:
+            raise forms.ValidationError(
+                "Custom code must be at least 3 characters long."
+            )
+
+        if len(code) > 15:
+            raise forms.ValidationError("Custom code cannot except 15 characters.")
+
+        # Check availability
+        if URL.objects.filter(short_code=code).exists():
+            raise forms.ValidationError(f"'{code}' is already taken. Try another.")
+
+        # Profanity filter (basic - use external library for production)
+        PROFANITY_LIST = ["badword1", "badword2"]  # Add actual words
+        if any(word in code.lower() for word in PROFANITY_LIST):
+            raise forms.ValidationError("This code contains inappropriate content.")
+
         return code

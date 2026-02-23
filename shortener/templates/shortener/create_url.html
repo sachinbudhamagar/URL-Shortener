@@ -14,17 +14,62 @@
 
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Shorten URL</button>
+
+        <!-- Long URL -->
+        <div class="mb-3">
+            <label class="form-label">Enter your long URL</label>
+            {{ form.original_url }}
+        </div>
+    
+        <!-- Custom Code (Optional) -->
+        <div class="mb-3">
+            <label class="form-label">
+                Custom short code (optional)
+                <small class="text-muted">- Make it memorable!</small>
+            </label>
+            {{ form.custom_short_code }}
+            <div class="form-text">
+                3-15 characters. Letters, numbers, hyphens, and underscores only.
+                <br>
+                Example: <code>my-link</code>, <code>promo2024</code>, <code>summer_sale</code>
+            </div>
+            
+            <!-- Live availability check -->
+            <div id="availability-status" class="mt-2"></div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-lg">
+            Shorten URL
+        </button>
     </form>
 </div>
 
 <script>
-    function copyToClipboard(){
-        const urlInput = document.getElementById("shortUrl");
-        urlInput.select();
-        document.execCommand("copy");
-        alert("Copied to clipboard");
-    }
+    // Real-time availability check
+    const customCodeInput = document.querySelector("input[name='custom_short_code']");
+
+    customCodeInput.addEventListener("input", async (e) => {
+        const code = e.target.value;
+        const statusDiv = document.getElementById("availability-status");
+
+        if (code.length < 3) {
+            statusDiv.innerHTML = '';
+            return;
+        }
+
+        // Call Django endpoint to check availabilty 
+        try {
+            const response = await fetch(`\api\check-code\${code}`);
+            const data = await response.json()
+
+            if (data.available) {
+                statusDiv.innerHTML = "<span class='text-success'> Available</span>";
+            }else{
+                statusDiv.innerHTML = "<span class='text-danger'> Already taken</span>";
+            }
+        } catch (error) {
+            console.error("Error checking availability:", error);
+        }
+    });
 </script>
 {% endblock %}
