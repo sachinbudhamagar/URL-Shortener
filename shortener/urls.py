@@ -20,4 +20,9 @@ urlpatterns = [
         name="url_detail_analytics",
     ),
     path("", views.home, name="home"),
+    path(
+        "url/<str:check-code>/<str:code>/",
+        views.check_code_availability,
+        name="check_code",
+    ),
 ]

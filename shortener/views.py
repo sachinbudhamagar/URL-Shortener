@@ -8,6 +8,7 @@ from django.db.models import F, Sum, Count, Q
 from datetime import timedelta
 from django.utils import timezone
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 
 from .forms import UserRegisterForm
 from .models import URL, Click
@@ -313,3 +314,15 @@ def home(request):
             form = URLForm()
 
         return render(request, "shortener/home.html", {"form": form})
+
+
+def check_code_availability(request, code):
+    """API endpoint to check if custom code is available"""
+    available = not URL.objects.filter(short_code=code).exists()
+
+    # Check reserved words
+    RESERVED_WORDS = ["admin", "api", "login", "register"]
+    if code.lower() in RESERVED_WORDS:
+        available = False
+
+    return JsonResponse({"available": available, "code": code})
