@@ -37,6 +37,17 @@
             <!-- Live availability check -->
             <div id="availability-status" class="mt-2"></div>
         </div>
+
+        <!-- Expiration Options -->
+        <div class="mb-3">
+            <label class="form-label">Link Expiration</label>
+            {{ form.expiration_option }}
+            
+            <!-- Custom date picker (hidden by default) -->
+            <div id="customDatePicker" class="mt-2" style="display: none;">
+                {{ form.custom_expiration_date }}
+            </div>
+        </div>
         
         <button type="submit" class="btn btn-primary btn-lg">
             Shorten URL
@@ -70,6 +81,11 @@
         } catch (error) {
             console.error("Error checking availability:", error);
         }
+
+        // Show/hide custom date picker
+        document.querySelector('select[name="expiration_option"]').addEventListener('change', (e) => {
+            const customPicker = document.getElementById('customDatePicker');
+            customPicker.style.display = e.target.value === 'custom' ? 'block' : 'none';
     });
 </script>
 {% endblock %}

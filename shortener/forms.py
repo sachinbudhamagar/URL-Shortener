@@ -2,6 +2,10 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
+from django import forms
+from django.utils import timezone
+from datetime import timedelta
+
 from .models import URL
 
 
@@ -84,3 +88,66 @@ class URLForm(forms.ModelForm):
             raise forms.ValidationError("This code contains inappropriate content.")
 
         return code
+
+
+class URLForm(forms.ModelForm):
+    EXPIRATION_CHOICES = [
+        ("", "Never"),
+        ("1", "1 hour"),
+        ("24", "24 hours"),
+        ("168", "1 week"),
+        ("720", "30 days"),
+        ("custom", "Custom date"),
+    ]
+
+    expiration_option = forms.ChoiceField(
+        choices=EXPIRATION_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    custom_expiration_date = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(
+            attrs={
+                "type": "datetime-local",
+                "class": "form-control",
+            }
+        ),
+    )
+
+    class Meta:
+        model = URL
+        fields = ["original_url"]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        exp_option = cleaned_data.get("expiration_date")
+        custom_date = cleaned_data.get("custom_expiration_dte")
+
+        if exp_option == "custom" and not custom_date:
+            raise forms.ValidationError("Please select a custom expiration date.")
+
+        if custom_date and custom_date <= timezone.now():
+            raise forms.ValidationError("Expiration date must be in the future.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        exp_option = self.cleaned_data.get("expiration_option")
+
+        if exp_option and exp_option != "":
+            if exp_option == "custom":
+                instance.expiration_date = self.cleaned_data.get(
+                    "custom_expiration_date"
+                )
+            else:
+                hours = int(exp_option)
+                instance.expirtion_date = timezone.now() + timedelta(hours=hours)
+
+        if commit:
+            instance.save()
+
+        return instance

@@ -1,0 +1,26 @@
+{% extends 'shortener/base.html' %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <h1 class="display-4 text-danger">⏰ Link Expired</h1>
+    <p class="lead mt-4">
+        This short URL expired on {{ expired_at|date:"F d, Y \a\t g:i A" }}
+    </p>
+    <p class="text-muted">
+        The original destination was:<br>
+        <code>{{ url.original_url }}</code>
+    </p>
+    
+    {% if url.user == request.user %}
+    <div class="mt-4">
+        <a href="{% url 'edit_url' url.short_code %}" class="btn btn-primary">
+            Extend Expiration
+        </a>
+    </div>
+    {% endif %}
+    
+    <a href="{% url 'home' %}" class="btn btn-outline-primary mt-3">
+        Create New Short URL
+    </a>
+</div>
+{% endblock %}

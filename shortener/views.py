@@ -134,7 +134,11 @@ def redirect_url(request, short_code):
 
     # Check if expired
     if url_obj.is_expired():
-        return render(request, "shortener/expired.html", {"url": url_obj})
+        return render(
+            request,
+            "shortener/expired.html",
+            {"url": url_obj, "expired_at": url_obj.expiration_date},
+        )
 
     # Increment click count (F() prevents race conditions)
     url_obj.click_count = F("click_count") + 1
