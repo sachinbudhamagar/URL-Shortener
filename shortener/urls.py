@@ -21,7 +21,7 @@ urlpatterns = [
     ),
     path("", views.home, name="home"),
     path(
-        "url/<str:check-code>/<str:code>/",
+        "url/<str:check_code>/<str:code>/",
         views.check_code_availability,
         name="check_code",
     ),
