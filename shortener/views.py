@@ -8,7 +8,7 @@ from django.db.models import F, Sum, Count, Q
 from datetime import timedelta
 from django.utils import timezone
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from .forms import UserRegisterForm
 from .models import URL, Click
@@ -330,3 +330,37 @@ def check_code_availability(request, code):
         available = False
 
     return JsonResponse({"available": available, "code": code})
+
+
+@login_required
+def generate_qr_view(request, short_code):
+    """Generate QR code for URL"""
+    url_obj = get_object_or_404(URL, short_code=short_code)
+
+    # Verify ownership
+    if url_obj.user != request.user:
+        return HttpResponseForbidden("You don't own this URL.")
+
+    # Generate QR if not exists
+    if not url_obj.qr_code:
+        url_obj.generate_qr(request)
+
+    # Return image
+    return HttpResponse(url_obj.qr_code.read(), content_type="image/png")
+
+
+@login_required
+def download_qr(request, short_code):
+    """Download QR code as files"""
+    url_obj = get_object_or_404(URL, short_code=short_code)
+
+    if url_obj.user != request.user:
+        return HttpResponseForbidden()
+
+    if not url_obj.qr_code:
+        url_obj.generate_qr(request)
+
+    response = HttpResponse(url_obj.qr_code.read(), content_type="image/png")
+    response["Content-Disposition"] = f"attachment; filename='{short_code}_qr.png'"
+
+    return response

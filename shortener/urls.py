@@ -25,4 +25,6 @@ urlpatterns = [
         views.check_code_availability,
         name="check_code",
     ),
+    path("qr/<str:short_code>/", views.generate_qr_view, name="generate_qr"),
+    path("qr/<str:short_code>/download/", views.download_qr, name="download_qr"),
 ]

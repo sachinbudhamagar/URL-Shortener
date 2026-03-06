@@ -141,6 +141,16 @@
                        onclick="return confirm('Are you sure?')">
                         🗑️
                     </a>
+                    <a href="{% url 'generate_qr' url.short_code %}" 
+                        class="btn btn-sm btn-secondary me-1"
+                        target="_blank">
+                        📱 QR
+                    </a>
+                    <a href="{% url 'download_qr' url.short_code %}" 
+                        class="btn btn-sm btn-outline-secondary me-1"
+                        download>
+                        ⬇️ QR
+                    </a>
                 </td>
             </tr>
             {% empty %}
@@ -220,6 +230,42 @@
     </ul>
 </nav>
 {% endif %}
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrImage" src="" alt="QR Code" class="img-fluid mb-3">
+                <p class="text-muted" id="qrUrl"></p>
+            </div>
+            <div class="modal-footer">
+                <a id="qrDownload" href="" download class="btn btn-primary">
+                    Download QR Code
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showQR(shortCode) {
+    const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+    const qrImage = document.getElementById('qrImage');
+    const qrUrl = document.getElementById('qrUrl');
+    const qrDownload = document.getElementById('qrDownload');
+    
+    qrImage.src = `/qr/${shortCode}/`;
+    qrUrl.textContent = `${window.location.origin}/${shortCode}`;
+    qrDownload.href = `/qr/${shortCode}/download/`;
+    
+    modal.show();
+}
+</script>
 
 <script>
 function copyUrl(url) {

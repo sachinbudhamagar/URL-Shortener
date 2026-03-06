@@ -36,6 +36,21 @@ class URL(models.Model):
             return timezone.now() > self.expiration_date
         return False
 
+    qr_code = models.ImageField(upload_to="qr_codes/", null=True, blank=True)
+
+    def generate_qr(self, request=None):
+        """Generate and save QR code"""
+        if request:
+            full_url = request.build_absolute_uri("/") + self.short_code
+        else:
+            full_url = f"https://yoursite.com/{self.short_code}"
+
+        from .utils import generate_qr_code
+
+        qr_file = generate_qr_code(full_url)
+
+        self.qr_code.save(f"{self.short_code}_qr.png", qr_file, save=True)
+
 
 class Click(models.Model):
     url = models.ForeignKey(URL, on_delete=models.CASCADE, related_name="clicks")
