@@ -1,19 +1,17 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
 from django.db.models import F, Sum, Count, Q
 from datetime import timedelta
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
 
-from .forms import UserRegisterForm
+from .forms import UserRegisterForm, URLForm
 from .models import URL, Click
-from .forms import URLForm
-from .utils import generate_short_code, generate_random_code
+from .utils import get_client_ip, generate_random_code
 
 
 # Create your views here.
