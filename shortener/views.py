@@ -2,12 +2,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from accounts.models import User
 from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
 from django.db.models import F, Sum, Count, Q
 from datetime import timedelta
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
+
 
 from .forms import UserRegisterForm, URLForm
 from .models import URL, Click
@@ -25,11 +28,11 @@ def register(request):
                 request, f"Account created for {username}! You can now log in."
             )
             return redirect("login")  # Redirect to login page
-
-        else:
-            form = UserRegisterForm()  # Empty form for GET request
-
         return render(request, "shortener/register.html", {"form": form})
+
+    # Handle GET request
+    form = UserRegisterForm()
+    return render(request, "shortener/register.html", {"form": form})
 
 
 @login_required  # Requires user to be logged in
@@ -294,14 +297,14 @@ def home(request):
 
             # If loggin in, assign user
             if request.user.is_authenticated:
-                url_obj_user = request.user
+                url_obj.user = request.user
             # If anonymus, leave user as None (need to modify model)
 
             # Generate  short code
             url_obj.short_code = generate_random_code()
             url_obj.save()
 
-            short_url = request.build_absolute_url("/") + url_obj.short_code
+            short_url = request.build_absolute_uri("/") + url_obj.short_code
 
             return render(
                 request,
@@ -312,10 +315,11 @@ def home(request):
                     "show_signup_prompt": not request.user.is_authenticated,
                 },
             )
-        else:
-            form = URLForm()
 
         return render(request, "shortener/home.html", {"form": form})
+
+    form = URLForm()
+    return render(request, "shortener/home.html", {"form": form})
 
 
 def check_code_availability(request, code):

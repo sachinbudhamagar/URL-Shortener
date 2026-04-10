@@ -64,3 +64,19 @@ def generate_qr_code(url, size=10):
     buffer.seek(0)
 
     return ContentFile(buffer.read(), name="qr.png")
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get("HTTP_X_FORWAREDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR")
+    return ip
+
+
+def generate_random_code():
+    import random
+    import string
+
+    return "".join(random.choices(string.ascii_letters + string.digits, k=6))
