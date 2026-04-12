@@ -16,6 +16,7 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
     path("analytics/", views.analytics, name="analytics"),
     path("create/", views.create_url, name="create_url"),
+    path("delete/<str:short_code>/", views.delete_url, name="delete_url"),
     path("edit/<str:short_code>/", views.edit_url, name="edit_url"),
     path(
         "url/<str:short_code>/analytics/",

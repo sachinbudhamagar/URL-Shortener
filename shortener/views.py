@@ -116,15 +116,15 @@ def create_url(request):
                 request,
                 "shortener/create_url.html",
                 {
-                    "form": URLForm(),  # Fresh form
+                    "form": form,  # Fresh form
                     "short_url": request.build_absolute_uri("/") + url_obj.short_code,
                 },
             )
 
-        else:
-            form = URLForm()
-
         return render(request, "shortener/create_url.html", {"form": form})
+
+    form = URLForm()
+    return render(request, "shortener/create_url.html", {"form": form})
 
 
 # Redirection Logic
