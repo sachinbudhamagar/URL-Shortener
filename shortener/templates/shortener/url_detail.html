@@ -1,4 +1,4 @@
-{% extedns "shorterner/base.html" %}
+{% extends "shortener/base.html" %}
 
 {% block content %}
 <div class="container">
@@ -53,7 +53,7 @@
      </div>
 
     <!-- Recent Clicks -->
-    <div class="recent-clicks">
+    <div class="recent_clicks">
         <h2>Recent Clicks</h2>
         <table>
             <thead>
@@ -64,11 +64,11 @@
                 </tr>
             </thead>
             <tbody>
-                {% for click in recent-clicks %}
+                {% for click in recent_clicks %}
                 <tr>
                     <td>{{ click.clicked_at|date:"M d, Y H:i" }}</td>
-                    <td>{% click.ip_address|default:"Unknown" %}</td>
-                    <td>{% click.referrer|default:"Direct"|truncatechars:40 %}</td>
+                    <td>{{ click.ip_address|default:"Unknown" }}</td>
+                    <td>{{ click.referrer|default:"Direct"|truncatechars:40 }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
