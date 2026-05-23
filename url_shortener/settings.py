@@ -21,13 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-54e&@#4kue^1pzx79viy5&@@2iw4k1=xv$rcza(5deqr#(^+y$"
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-test123456789")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 # Application definition
 
@@ -132,8 +131,13 @@ LOGOUT_REDIRECT_URL = "accounts:login"
 # Static files
 STATIC_URL = "/static/"
 # STATICFILES_DIRS = [BASE_DIR / "static"]
-# STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Media files
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR / "media")
+
+# Security (disable for local development)
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

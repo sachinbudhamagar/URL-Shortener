@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    container_name: url_shortener_app
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=url_shortener.settings
+      - SECRET_KEY=django-insecure-y4XCkwJn5iSbAI2BUvfQZrta9c3lYGHVeWRPouLhMdFpq0NjKD
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    restart: unless-stopped
+
