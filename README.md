@@ -177,55 +177,37 @@ URL-Shortener/
 
 The application can be configured using environment variables, especially when deployed with Docker Compose and a `.env` file.
 
-| Variable             | Description                                          | Default         | Required |
-
-| :------------------- | :--------------------------------------------------- | :-------------- | :------- |
-
-| `DJANGO_SECRET_KEY`  | Django secret key for cryptographic signing          | (None)          | Yes      |
-
-| `DJANGO_DEBUG`       | Sets Django's debug mode (True/False)                | `False`         | No       |
-
-| `DJANGO_ALLOWED_HOSTS` | Comma-separated list of hosts this Django site can serve | `localhost`     | No       |
-
-| `POSTGRES_NAME`      | PostgreSQL database name                             | `urlshortener_db` | Yes      |
-
-| `POSTGRES_USER`      | PostgreSQL database user                             | `user`          | Yes      |
-
-| `POSTGRES_PASSWORD`  | PostgreSQL database password                         | `password`      | Yes      |
-
-| `POSTGRES_HOST`      | PostgreSQL database host (e.g., `db` for Docker Compose) | `localhost`     | Yes      |
-
-| `POSTGRES_PORT`      | PostgreSQL database port                             | `5432`          | Yes      |
-
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `DJANGO_SECRET_KEY` | Django secret key for cryptographic signing | (None) | Yes |
+| `DJANGO_DEBUG` | Sets Django's debug mode (True/False) | `False` | No |
+| `DJANGO_ALLOWED_HOSTS` | Comma-separated list of hosts this Django site can serve | `localhost` | No |
+| `POSTGRES_NAME` | PostgreSQL database name | `urlshortener_db` | Yes |
+| `POSTGRES_USER` | PostgreSQL database user | `user` | Yes |
+| `POSTGRES_PASSWORD` | PostgreSQL database password | `password` | Yes |
+| `POSTGRES_HOST` | PostgreSQL database host (e.g., `db` for Docker Compose) | `localhost` | Yes |
+| `POSTGRES_PORT` | PostgreSQL database port | `5432` | Yes |
 
 ## 🔧 Development
 
 ### Available Scripts
 
-| Command                                                    | Description                                            |
-
-| :--------------------------------------------------------- | :----------------------------------------------------- |
-
-| `python manage.py runserver`                               | Starts the Django development server.                  |
-
-| `python manage.py makemigrations [app_name]`               | Creates new database migrations based on model changes. |
-
-| `python manage.py migrate`                                 | Applies database migrations.                           |
-
-| `python manage.py createsuperuser`                         | Creates an administrative user for the Django admin.   |
-
-| `docker-compose up --build`                                | Builds (if needed) and starts the Docker services.     |
-
+| Command | Description |
+|---------|-------------|
+| `python manage.py runserver` | Starts the Django development server. |
+| `python manage.py makemigrations [app_name]` | Creates new database migrations based on model changes. |
+| `python manage.py migrate` | Applies database migrations. |
+| `python manage.py createsuperuser` | Creates an administrative user for the Django admin. |
+| `docker-compose up --build` | Builds (if needed) and starts the Docker services. |
 | `docker-compose exec web python manage.py [django_command]` | Executes a Django management command inside the web container. |
-
-| `docker-compose down`                                      | Stops and removes Docker containers and networks.      |
+| `docker-compose down` | Stops and removes Docker containers and networks. |
 
 ### Development Workflow
 
-      1.  Make changes to the code.
-      2.  If you modify models, run `python manage.py makemigrations [app_name]` followed by                  `python manage.py migrate`.
-      3.  Restart the development server (`python manage.py runserver`) or `docker-compose up --              build` if using Docker.
-      4.  Test your changes in the browser.
+    1.  Make changes to the code.
+    2.  If you modify models, run `python manage.py makemigrations [app_name]` followed by `python manage.py migrate`.
+    3.  Restart the development server (`python manage.py runserver`) or `docker-compose up --build` #Docker.
+    4.  Test your changes in the browser.
 
 ## 🚀 Deployment
 
@@ -242,7 +224,7 @@ docker-compose up --build -d # -d for detached mode
 We welcome contributions! If you'd like to contribute, please follow these steps:
 
       1.  Fork the repository.
-      2.  Create a new branch for your feature or bug fix: `git checkout -b feature/your-feature-             name`.
+      2.  Create a new branch for your feature or bug fix: `git checkout -b feature/your-feature-name`.
       3.  Make your changes and ensure they adhere to the project's coding style.
       4.  Write appropriate tests for your changes.
       5.  Commit your changes: `git commit -m 'feat: Add new feature'`.
